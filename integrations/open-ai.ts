@@ -1,6 +1,7 @@
 import { task, logger } from '@trigger.dev/sdk/v3';
 import OpenAI from 'openai';
 import { observeOpenAI } from 'langfuse';
+import type { ChatCompletionCreateParams } from 'openai/resources/index.mjs';
 
 const openai = observeOpenAI(new OpenAI());
 
@@ -22,21 +23,11 @@ export const DallE = task({
 
 export const openAi = task({
 	id: 'open-ai',
-	run: async ({
-		model,
-		messages
-	}: {
-		model: string;
-		messages: { role: string; content: string }[];
-	}) => {
-		logger.log(model);
-		messages.forEach((message) => logger.log(message.content, { message }));
+	run: async (payload: ChatCompletionCreateParams) => {
+		logger.log(payload.model);
+		payload.messages.forEach((message) => logger.log(message.content, { message }));
 
-		const request = {
-			model,
-			messages
-		};
-		const result = await openai.chat.completions.create(request);
+		const result = await openai.chat.completions.create(payload);
 		logger.log('Result from open ai', { result });
 		return {
 			...result,
