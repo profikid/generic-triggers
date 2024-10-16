@@ -17,7 +17,7 @@ export const getLangfusePrompt = task({
 		return {
 			prompt,
 			compiledPrompt,
-			result: compiledPrompt.prompt
+			result: compiledPrompt
 		};
 	}
 });
