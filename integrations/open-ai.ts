@@ -3,11 +3,10 @@ import OpenAI from 'openai';
 import { observeOpenAI } from 'langfuse';
 import type { ChatCompletionCreateParams } from 'openai/resources/index.mjs';
 
-const openai = observeOpenAI(new OpenAI());
-
 export const DallE = task({
 	id: 'dall-e-3',
 	run: async ({ prompt }: { prompt: string }) => {
+		const openai = observeOpenAI(new OpenAI());
 		logger.log(prompt);
 		const imageResult = await openai.images.generate({
 			model: 'dall-e-3',
@@ -23,7 +22,8 @@ export const DallE = task({
 
 export const openAi = task({
 	id: 'open-ai',
-	run: async (payload: ChatCompletionCreateParams) => {
+	run: async ({ payload }: { payload: ChatCompletionCreateParams }) => {
+		const openai = observeOpenAI(new OpenAI());
 		logger.log(payload.model);
 		payload.messages.forEach((message) => logger.log(message.content, { message }));
 
