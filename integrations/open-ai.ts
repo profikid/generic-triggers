@@ -3,6 +3,7 @@ import OpenAI from 'openai';
 import { observeOpenAI } from 'langfuse';
 import type { LangfusePromptClient } from 'langfuse-core';
 import type { ChatCompletionCreateParams } from 'openai/resources/index.mjs';
+import { getLangfusePrompt } from './langfuse';
 
 export const DallE = task({
 	id: 'dall-e-3',
@@ -20,6 +21,26 @@ export const DallE = task({
 		};
 	}
 });
+
+export const openAIFromPrompt = task({
+    id: 'open-ai-from-task',
+    run: async ({id, payload}: {id: string, payload: Record<string,string>}) => {
+		const promptResult = await getLangfusePrompt.triggerAndWait({
+			id,
+			payload
+		});
+        const openai = observeOpenAI(new OpenAI(), {langfusePrompt: promptResult.output.prompt});
+
+        logger.log('promptResult', {promptResult});
+		const result = await openai.chat.completions.create({
+            model: 'gpt-4o',
+            messages: promptResult.output.compiledPrompt,
+            max_tokens: 15000,
+        });
+		
+		return {result}
+    }
+})
 
 export const openAi = task({
 	id: 'open-ai',
